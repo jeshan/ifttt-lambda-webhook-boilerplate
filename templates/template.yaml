@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'receives events from IFTTT'
+
+Parameters:
+  SecretToken:
+    Type: String
+    Description: use this to check if the event is really from the source you're expecting.
+    NoEcho: true
+
+Resources:
+  Fn:
+    Type: AWS::Serverless::Function
+    Properties:
+      InlineCode: !Sub |
+        import json
+
+        def handler(event, context):
+          print('event', event)
+          if event['queryStringParameters'].get('secretToken') != '${SecretToken}':
+            return
+          return {'isBase64Encoded': False, 'statusCode': 200, 'body': event.get('body')}
+      Handler: index.handler
+      Runtime: python3.6
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            Method: ANY
+            Path: /
+
+Outputs:
+  InvokeUrl:
+    Value: !Sub https://${ServerlessRestApi}.execute-api.us-east-1.amazonaws.com/${ServerlessRestApi.Stage}

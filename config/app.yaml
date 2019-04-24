@@ -1,0 +1,4 @@
+template_path: template.yaml
+
+parameters:
+  SecretToken: !environment_variable TOKEN
